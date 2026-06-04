@@ -1,0 +1,48 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template local_dataforge/field
+
+    This template acts as a wrapped for a form field. The actual HTML for the specific field is included in the _field property.
+
+    Example context (json):
+    {
+        "id": "123",
+        "type": "checkbox",
+        "title": "My checkbox",
+        "options": [], // TODO
+        "default": 4,
+        "validation": [], // TODO
+        "elementid": "1-hkjhfsdkjhdf",
+        "elementname": "field-1",
+        "_value": 3,
+        "_field": "<div><input type='checkbox' name='field-1'></div>"
+    }
+}}
+<div class="mb-3 block_cilp-field-{{type}}">
+
+    {{#title}}
+        <label for="{{elementid}}" class="block_cilp-field-label">{{title}}</label>
+    {{/title}}
+
+    {{{_field}}}
+
+    {{#instructions}}
+        <small id="{{elementid}}-help" class="form-text text-muted">{{instructions}}</small>
+    {{/instructions}}
+
+</div>

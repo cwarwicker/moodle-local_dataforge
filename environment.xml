@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<COMPATIBILITY_MATRIX>
+    <PLUGIN name="local_dataforge">
+        <PHP version="8.4.0" level="required"></PHP>
+    </PLUGIN>
+</COMPATIBILITY_MATRIX>
