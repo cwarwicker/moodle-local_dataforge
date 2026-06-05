@@ -38,6 +38,11 @@ abstract class field {
     const VALUE_TEMPLATE = 'local_dataforge/fields/value/simple';
 
     /**
+     * @var string Delimiter used to separate data saved in 1 column.
+     */
+    const OPTION_DELIM = ',';
+
+    /**
      * @var bool Can the field have instructions?
      */
     const CAN_HAVE_INSTRUCTIONS = true;
@@ -98,6 +103,24 @@ abstract class field {
         $this->type = $reflect->getShortName();
     }
 
+    /**
+     * Decode the options for use in template.
+     * This is json encoded within the already json decoded $data property.
+     *
+     * @return array|null
+     */
+    protected function decode_options(): ?array {
+        return json_decode($this->data?->options, true);
+    }
+
+    /**
+     * Apply extra data for specific field types.
+     *
+     * @param array &$data
+     * @return void
+     */
+    protected function apply_extra_data(array &$data): void {}
+
     public function render(): string {
         global $PAGE;
 
@@ -106,13 +129,12 @@ abstract class field {
         // Convert field to array to pass to template.
         $data = $this->to_array();
         $data['title'] = $data['data']?->title;
+        $data['options'] = $this->decode_options();
+        $data['instructions'] = $data['data']?->instructions;
 
-//        // Convert the options for the mustache template.
-//        $data['options'] = $this->decode_options();
-//
-//        // Apply any extra data required for specific types.
-//        $this->apply_extra_data($data);
-//
+        // Apply any extra data required for specific types.
+        $this->apply_extra_data($data);
+
         $data['_value'] = $this->uservalue;
         $data['_field'] = $PAGE->get_renderer('local_dataforge')->render_from_template($template, $data);
 
