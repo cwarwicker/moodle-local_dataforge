@@ -64,7 +64,7 @@ trait choices {
      * @param mixed $value
      * @return string
      */
-    public function format_user_data($value): string {
+    public function format_user_data(mixed $value): string {
         if (is_null($value) || $value === false) {
             return '-';
         }

@@ -17,6 +17,7 @@
 namespace local_dataforge;
 
 use core\exception\coding_exception;
+use core\exception\moodle_exception;
 use ReflectionClass;
 
 /**
@@ -83,7 +84,7 @@ abstract class field {
      * @var mixed|null The saved value from the user, or the default value if not set.
      */
     public mixed $uservalue = null {
-        get => $this->uservalue ?? $this->data?->default;
+        get => $this->uservalue ?? $this->data?->default ?? '-';
         set => $this->uservalue = $value;
     }
 
@@ -121,6 +122,14 @@ abstract class field {
      */
     protected function apply_extra_data(array &$data): void {}
 
+    /**
+     * Apply extra data for specific field types when displaying value.
+     *
+     * @param array $data
+     * @return void
+     */
+    protected function apply_extra_value_data(array &$data): void {}
+
     public function render(): string {
         global $PAGE;
 
@@ -141,7 +150,62 @@ abstract class field {
         // Load the generic field mustache template, passing through the specific field's HTML to display.
         return $PAGE->get_renderer('local_dataforge')
             ->render_from_template('local_dataforge/fields/field', $data);
+    }
 
+    /**
+     * Display the value of the field.
+     *
+     * @return string
+     */
+    public function display(): string {
+        global $PAGE;
+
+        $data = $this->to_array();
+
+        // Load the value of the field for display.
+        $data['_field'] = $this->get_value_html();
+
+        // When viewing the value of the field, we don't need the instruction text.
+        $data['instructions'] = false;
+
+        // Load the generic field mustache template, passing through the specific field's HTML to display.
+        return $PAGE->get_renderer('local_dataforge')
+            ->render_from_template('local_dataforge/fields/field', $data);
+    }
+
+    /**
+     * Return the simple HTML for displaying the value of the field, in non-editing mode.
+     * This should be overridden by any form fields which do not use the simple template, of just display a text value.
+     *
+     * @return string
+     */
+    protected function get_value_html(): string {
+        global $PAGE;
+
+        $data = [];
+        $data['elementid'] = $this->elementid;
+
+        // Get the actual user value to display (in whatever format suits this field type) or just '-' to denote no data.
+        $userdata = $this->format_user_data($this->uservalue);
+        $data['value'] = $userdata ?? '-';
+
+        // Apply any extra data required for specific types.
+        $this->apply_extra_data($data);
+        $this->apply_extra_value_data($data);
+
+        // Load the generic field mustache template, passing through the specific field's HTML to display.
+        return $PAGE->get_renderer('local_dataforge')
+            ->render_from_template(static::VALUE_TEMPLATE, $data);
+    }
+
+    /**
+     * This method should be overwritten by specific field type classes, depending on the format required.
+     *
+     * @param mixed $value
+     * @return mixed
+     */
+    protected function format_user_data(mixed $value): mixed {
+        return $value;
     }
 
     /**

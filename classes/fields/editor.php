@@ -24,6 +24,12 @@ namespace local_dataforge\fields;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class editor extends \local_dataforge\field {
+
+    /**
+     * @var string The template to use for displaying the value of the field.
+     */
+    const VALUE_TEMPLATE = 'local_dataforge/fields/value/html';
+
     #[\Override]
     protected function apply_extra_data(array &$data): void {
         // Set the editor to be used by our element in the DOM.

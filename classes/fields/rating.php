@@ -32,24 +32,23 @@ class rating extends field {
     /**
      * @var string The template to use for displaying the value of the field.
      */
-    const VALUE_TEMPLATE = 'block_cilp/fields/value/rating';
+    const VALUE_TEMPLATE = 'local_dataforge/fields/value/rating';
 
-//    #[\Override]
-//    protected function get_value_html(): string {
-//
-//        global $PAGE;
-//
-//        $data = [];
-//        $data['elementid'] = $this->elementid;
-//        $data['options'] = $this->decode_options();
-//
-//        // Get the actual user value to display (in whatever format suits this field type) or just '-' to denote no data.
-//        $userdata = $this->format_user_data($this->get_value());
-//        $data['value'] = $userdata ?? 0;
-//
-//        // Load the generic field mustache template, passing through the specific field's HTML to display.
-//        return $PAGE->get_renderer('block_cilp')->render_from_template(static::VALUE_TEMPLATE, $data);
-//
-//    }
+    #[\Override]
+    protected function get_value_html(): string {
+        global $PAGE;
+
+        $data = [];
+        $data['elementid'] = $this->elementid;
+        $data['options'] = $this->decode_options();
+
+        // Get the actual user value to display (in whatever format suits this field type) or just '-' to denote no data.
+        $userdata = $this->format_user_data($this->uservalue);
+        $data['value'] = $userdata ?? 0;
+
+        // Load the generic field mustache template, passing through the specific field's HTML to display.
+        return $PAGE->get_renderer('local_dataforge')
+            ->render_from_template(static::VALUE_TEMPLATE, $data);
+    }
 
 }
