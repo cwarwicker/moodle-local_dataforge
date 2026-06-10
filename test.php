@@ -82,28 +82,45 @@ if ($type === 'editing') {
 //    $field->uservalue = '234,345';
 //    echo($field->render());
 
-    echo $OUTPUT->heading('MATRIX FIELD');
-    $field = \local_dataforge\field::from_array([
-        'type' => 'matrix',
-        'title' => 'My matrix field',
-        'instructions' => 'Type some stuff here',
-        'options' => json_encode([
-            'rows' => [
-                ['row_id' => 1, 'row_name' => 'Row A'],
-                ['row_id' => 2, 'row_name' => 'Row B'],
-            ],
-            'columns' => [
-                ['col_id' => 1, 'col_name' => 'C1'],
-                ['col_id' => 2, 'col_name' => 'C2'],
-                ['col_id' => 3, 'col_name' => 'C3'],
-            ]
-        ]),
-    ]);
-    $field->uservalue = json_encode([1 => 1, 2 => 3]);
-    echo($field->render());
+//    echo $OUTPUT->heading('MATRIX FIELD');
+//    $field = \local_dataforge\field::from_array([
+//        'type' => 'matrix',
+//        'title' => 'My matrix field',
+//        'instructions' => 'Type some stuff here',
+//        'options' => json_encode([
+//            'rows' => [
+//                ['row_id' => 1, 'row_name' => 'Row A'],
+//                ['row_id' => 2, 'row_name' => 'Row B'],
+//            ],
+//            'columns' => [
+//                ['col_id' => 1, 'col_name' => 'C1'],
+//                ['col_id' => 2, 'col_name' => 'C2'],
+//                ['col_id' => 3, 'col_name' => 'C3'],
+//            ]
+//        ]),
+//    ]);
+//    $field->uservalue = json_encode([1 => 1, 2 => 3]);
+//    echo($field->render());
 
-    // TODO - file
-    // TODO - rating
+//    echo $OUTPUT->heading('FILE FIELD');
+//    $field = \local_dataforge\field::from_array([
+//        'type' => 'file',
+//        'title' => 'My file upload',
+//        'instructions' => 'Type some stuff here',
+//        'options' => json_encode(['accepted_types' => ['image/jpg'], 'maxfiles' => 1]),
+//    ]);
+//    // todo - user data
+//    echo($field->render());
+
+    echo $OUTPUT->heading('RATING FIELD');
+    $field = \local_dataforge\field::from_array([
+        'type' => 'rating',
+        'title' => 'My rating field',
+        'instructions' => 'Type some stuff here',
+        'options' => json_encode(['number' => 5]),
+    ]);
+    $field->uservalue = 3;
+    echo($field->render());
 
 
 }

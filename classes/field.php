@@ -92,7 +92,7 @@ abstract class field {
      *
      * @param int|null $id The database record ID of the field.
      */
-    public function __construct(int $id = null) {
+    public function __construct(?int $id = null) {
         if (!is_null($id)) {
             $this->id = $id;
             $this->elementid = 'field-' . $this->id;
