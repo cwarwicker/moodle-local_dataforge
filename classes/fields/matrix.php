@@ -24,6 +24,12 @@ namespace local_dataforge\fields;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class matrix extends \local_dataforge\field {
+
+    /**
+     * @var string The template to use for displaying the value of the field.
+     */
+    const VALUE_TEMPLATE = 'local_dataforge/fields/value/matrix';
+
     #[\Override]
     public function apply_extra_data(array &$data): void {
         $value = json_decode($this->uservalue, true);
@@ -47,4 +53,15 @@ class matrix extends \local_dataforge\field {
 
         }
     }
+
+    /**
+     * Get the submitted data for this field.
+     *
+     * @return mixed
+     */
+    protected function get_submitted_value(): mixed {
+        $value = optional_param_array($this->elementid, null, PARAM_RAW);
+        return (is_array($value)) ? json_encode($value) : null;
+    }
+
 }

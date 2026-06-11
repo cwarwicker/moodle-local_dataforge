@@ -35,7 +35,7 @@ class rating extends field {
     const VALUE_TEMPLATE = 'local_dataforge/fields/value/rating';
 
     #[\Override]
-    protected function get_value_html(): string {
+    protected function get_value_html(array $data): string {
         global $PAGE;
 
         $data = [];

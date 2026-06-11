@@ -50,4 +50,16 @@ class checkbox extends \local_dataforge\field {
         // Change the class of the parent div if we want an inline checkbox group.
         $data['extra']['class'] = ($data['options']['inline'] ?? false) ? 'form-check-inline' : 'form-check';
     }
+
+    /**
+     * Get the submitted data for this field.
+     * Choices are submitted as an array of values, so we need to implode them into a string.
+     *
+     * @return mixed
+     */
+    protected function get_submitted_value(): mixed {
+        $value = optional_param_array($this->elementid, null, PARAM_RAW);
+        return (is_array($value)) ? implode(static::OPTION_DELIM, $value) : null;
+    }
+
 }

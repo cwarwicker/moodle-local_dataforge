@@ -84,20 +84,28 @@ abstract class field {
      * @var mixed|null The saved value from the user, or the default value if not set.
      */
     public mixed $uservalue = null {
-        get => $this->uservalue ?? $this->data?->default ?? '-';
+        get => $this->uservalue ?? $this->data?->default ?? '';
         set => $this->uservalue = $value;
     }
 
     /**
+     * @var int|null The ID of the user whose data will be loaded.
+     */
+    protected ?int $userid = null;
+
+    /**
+     * @var int|null The database record ID of the user's data for this field.
+     */
+    protected ?int $userdataid = null;
+
+    /**
      * Build the object
      *
-     * @param int|null $id The database record ID of the field.
+     * @param int $id The database record ID of the field.
      */
-    public function __construct(?int $id = null) {
-        if (!is_null($id)) {
-            $this->id = $id;
-            $this->elementid = 'field-' . $this->id;
-        }
+    public function __construct(int $id) {
+        $this->id = $id;
+        $this->elementid = 'local_dataforge_field-' . $this->id;
 
         // Set the type property from the class name.
         $reflect = new ReflectionClass($this);
@@ -111,7 +119,7 @@ abstract class field {
      * @return array|null
      */
     protected function decode_options(): ?array {
-        return json_decode($this->data?->options, true);
+        return json_decode($this->data?->options ?? '', true);
     }
 
     /**
@@ -130,6 +138,11 @@ abstract class field {
      */
     protected function apply_extra_value_data(array &$data): void {}
 
+    /**
+     * Render the field for editing.
+     *
+     * @return string
+     */
     public function render(): string {
         global $PAGE;
 
@@ -137,9 +150,9 @@ abstract class field {
 
         // Convert field to array to pass to template.
         $data = $this->to_array();
-        $data['title'] = $data['data']?->title;
+        $data['title'] = $data['data']?->title ?? null;
         $data['options'] = $this->decode_options();
-        $data['instructions'] = $data['data']?->instructions;
+        $data['instructions'] = $data['data']?->instructions ?? null;
 
         // Apply any extra data required for specific types.
         $this->apply_extra_data($data);
@@ -161,12 +174,15 @@ abstract class field {
         global $PAGE;
 
         $data = $this->to_array();
+        $data['options'] = $this->decode_options();
+        $data['instructions'] = false;
+
+        // Apply any extra data required for specific types.
+        $this->apply_extra_data($data);
+        $this->apply_extra_value_data($data);
 
         // Load the value of the field for display.
-        $data['_field'] = $this->get_value_html();
-
-        // When viewing the value of the field, we don't need the instruction text.
-        $data['instructions'] = false;
+        $data['_field'] = $this->get_value_html($data);
 
         // Load the generic field mustache template, passing through the specific field's HTML to display.
         return $PAGE->get_renderer('local_dataforge')
@@ -177,21 +193,17 @@ abstract class field {
      * Return the simple HTML for displaying the value of the field, in non-editing mode.
      * This should be overridden by any form fields which do not use the simple template, of just display a text value.
      *
+     * @param array $data
      * @return string
      */
-    protected function get_value_html(): string {
+    protected function get_value_html(array $data): string {
         global $PAGE;
 
-        $data = [];
         $data['elementid'] = $this->elementid;
 
         // Get the actual user value to display (in whatever format suits this field type) or just '-' to denote no data.
         $userdata = $this->format_user_data($this->uservalue);
         $data['value'] = $userdata ?? '-';
-
-        // Apply any extra data required for specific types.
-        $this->apply_extra_data($data);
-        $this->apply_extra_value_data($data);
 
         // Load the generic field mustache template, passing through the specific field's HTML to display.
         return $PAGE->get_renderer('local_dataforge')
@@ -222,47 +234,109 @@ abstract class field {
     }
 
     /**
-     * Create a field from an array of data.
+     * Get the submitted data for this field.
      *
-     * @param array $data
-     * @return static
-     * @throws coding_exception
+     * @return mixed
      */
-    public static function from_array(array $data): static {
-        $class = get_called_class();
-
-        // If we've called this from a specific field class, load the data we passed through.
-        if ($class !== 'local_dataforge\field') {
-            return static::load($data);
-        }
-
-        // If we haven't got the type, we don't know what to do.
-        if (!isset($data['type'])) {
-            throw new coding_exception(get_string('error:type:invalid', 'local_dataforge', '?'));
-        }
-
-        // Make sure that the requested form field type has a valid class.
-        $class = 'local_dataforge\fields\\' . strtolower($data['type']);
-        if (!class_exists($class)) {
-            throw new coding_exception(get_string('error:type:invalid', 'local_dataforge', $data['type']));
-        }
-
-        // Remove the type from the data, and then call it again using the correct class.
-        unset($data['type']);
-        return $class::from_array($data);
-
+    protected function get_submitted_value(): mixed {
+        return optional_param($this->elementid, null, PARAM_RAW);
     }
 
     /**
-     * Load a field from an array of data.
+     * Load a specific user's data for the field.
      *
-     * @param array $data
+     * @param int $userid
+     */
+    public function load_user(int $userid): void {
+        global $DB;
+
+        // Reset the user values incase for some reason we are re-using an object.
+        $this->userid = $userid;
+        $this->userdataid = null;
+        $this->uservalue = null;
+
+        // Now retrieve the data for this user.
+        $record = $DB->get_record('local_dataforge_records', ['fieldid' => $this->id, 'userid' => $userid]);
+        if ($record) {
+            $this->userdataid = $record->id;
+            $this->uservalue = $record->value;
+        }
+    }
+
+    /**
+     * Run any extra functions which are required, prior to saving user data.
+     *
+     * @param mixed $value
+     */
+    protected function pre_save_user_data(mixed &$value): void {}
+
+    /**
+     * Save the user's submitted data for the field.
+     */
+    public function save(): bool {
+        global $DB;
+
+        // If this type can't be edited, just stop.
+        if (!static::IS_EDITABLE) {
+            return false;
+        }
+
+        // Find the submitted data for this field and convert it to a database-friendly format.
+        $value = helper::convert_value_for_db($this->get_submitted_value());
+
+        // If the value is empty, set it to null.
+        if ($value === '') {
+            $value = null;
+        }
+
+        // Run any pre-saving functions which are required by the field type.
+        $this->pre_save_user_data($value);
+
+        // If the user already has some data saved for this field, update it.
+        if ($this->userdataid) {
+            $update = [
+                'id' => $this->userdataid,
+                'value' => $value,
+                'modifiedtime' => time(),
+            ];
+            $DB->update_record('local_dataforge_records', $update);
+        } else {
+            $insert = [
+                'fieldid' => $this->id,
+                'userid' => $this->userid,
+                'value' => $value,
+                'modifiedtime' => time(),
+            ];
+            $this->userdataid = $DB->insert_record('local_dataforge_records', $insert);
+        }
+
+        $this->uservalue = $value;
+
+        return ($this->userdataid > 0);
+    }
+
+    /**
+     * Load the field object from its database record ID.
+     *
+     * @param int $id The database record ID of the field.
      * @return static
      */
-    protected static function load(array $data): static {
-        $obj = new static();
-        $obj->data = $data;
-        $obj->elementid = 'field-fake-' . mt_rand(1, 100000);
+    public static function load(int $id): static {
+        global $DB;
+
+        // Get the record from the database so we can find out what type it is.
+        $record = $DB->get_record(static::TABLE, ['id' => $id], '*', MUST_EXIST);
+
+        // Work out which class to use.
+        $class = 'local_dataforge\fields\\' . strtolower($record->type);
+        if (!class_exists($class)) {
+            throw new coding_exception(get_string('error:type:invalid', 'local_dataforge', $record->type));
+        }
+
+        // Create the object.
+        $obj = new $class($record->id);
+        $obj->data = $record->data;
         return $obj;
     }
+
 }

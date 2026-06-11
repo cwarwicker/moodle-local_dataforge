@@ -50,4 +50,21 @@ class select extends \local_dataforge\field {
            ];
         }
     }
+
+    /**
+     * Get the submitted data for this field.
+     * Choices are submitted as an array of values, so we need to implode them into a string.
+     *
+     * @return mixed
+     */
+    protected function get_submitted_value(): mixed {
+        $options = $this->decode_options();
+        if (isset($options['multi']) && $options['multi']) {
+            $value = optional_param_array($this->elementid, null, PARAM_RAW);
+            return (is_array($value)) ? implode(static::OPTION_DELIM, $value) : null;
+        } else {
+            return parent::get_submitted_value();
+        }
+    }
+
 }
