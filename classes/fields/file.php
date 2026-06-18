@@ -37,7 +37,7 @@ class file extends field {
     /**
      * @var string Value to use for the 'filearea' of uploaded files. This will have an ID appended.
      */
-    const FILEMANAGER_AREA = 'field_';
+    const FILEMANAGER_AREA = 'field';
 
     /**
      * @var string Value to use for the 'component' of uploaded files.
@@ -90,13 +90,26 @@ class file extends field {
         return str_replace('_filemanager', '', $this->elementid);
     }
 
-    /**
-     * Get the filearea to use for uploaded files to this form field.
-     *
-     * @return string
-     */
-    protected function get_filearea(): string {
-        return static::FILEMANAGER_AREA . $this->id;
+    #[\Override]
+    protected function pre_save_user_data(mixed &$value): void {
+        // Get the draftitemid.
+        $draftitemid = file_get_submitted_draft_itemid($this->elementid);
+
+        // Files are stored against the user context of the person who submitted the data.
+        $context = \core\context\user::instance($this->userid);
+
+        // Move files to correct location.
+        file_save_draft_area_files(
+            $draftitemid,
+            $context->id,
+            static::FILEMANAGER_COMPONENT,
+            static::FILEMANAGER_AREA,
+            $this->id,
+            $this->get_filemanager_options()
+        );
+
+        // The actual value saved against the field can be null. As we will find the files based on component/area.
+        $value = null;
     }
 
     #[\Override]
@@ -107,53 +120,71 @@ class file extends field {
         ], $this->get_filemanager_options());
 
         // Load previously saved files into the filemanager field.
-//        if ($this->has_user()) {
-//
-//            // Form field files are stored against the user's context.
-//            $context = \core\context\user::instance($this->userid);
-//
-//            // Build an object to pass in and be returned, modified.
-//            $fielddata = new \stdClass();
-//            $fielddata = file_prepare_standard_filemanager($fielddata, $this->get_stripped_element_name(),
-//                $this->get_filemanager_options(), $context, static::FILEMANAGER_COMPONENT,
-//                $this->get_filearea(), $this->get_item_id());
-//
-//            // Apply prepared filemanagers to form.
-//            $input->setValue($fielddata->{$this->elementname});
-//
-//        }
+        if ($this->has_user()) {
+            // Form field files are stored against the user's context.
+            $context = \core\context\user::instance($this->userid);
+
+            // Build an object to pass in and be returned, modified.
+            $fielddata = new \stdClass();
+            $fielddata = file_prepare_standard_filemanager(
+                $fielddata,
+                $this->get_stripped_element_name(),
+                $this->get_filemanager_options(),
+                $context,
+                static::FILEMANAGER_COMPONENT,
+                static::FILEMANAGER_AREA,
+                $this->id,
+            );
+
+            // Apply prepared filemanagers to form.
+            $input->setValue($fielddata->{$this->elementid});
+        }
 
         $data['field'] = $input->toHtml();
     }
 
-//    #[\Override]
-//    protected function apply_extra_value_data(array &$data): void {
-//
-//        $files = [];
-//        $data['files'] = [];
-//
-//        // If we've got user data loaded, go and find any files they have attached to this field.
-//        if ($this->has_user()) {
-//
-//            // Form field files are stored against the user's context.
-//            $context = \core\context\user::instance($this->userid);
-//
-//            // Get the file storage and load any files it can find.
-//            $fs = get_file_storage();
-//            $files = $fs->get_area_files($context->id, static::FILEMANAGER_COMPONENT, $this->get_filearea(),
-//                $this->get_item_id(), 'itemid, filepath, filename', false);
-//
-//        }
-//
-//        // If we have found any files, loop through them and generate download links.
-//        if ($files) {
-//            foreach ($files as $file) {
-//                $data['files'][] = \html_writer::link(\moodle_url::make_pluginfile_url(
-//                    $file->get_contextid(), $file->get_component(), $file->get_filearea(), $file->get_itemid(),
-//                    $file->get_filepath(), $file->get_filename(), false),
-//                    $file->get_filename());
-//            }
-//        }
-//
-//    }
+    #[\Override]
+    protected function apply_extra_value_data(array &$data): void {
+
+        $files = [];
+        $data['files'] = [];
+
+        // If we've got user data loaded, go and find any files they have attached to this field.
+        if ($this->has_user()) {
+
+            // Form field files are stored against the user's context.
+            $context = \core\context\user::instance($this->userid);
+
+            // Get the file storage and load any files it can find.
+            $fs = get_file_storage();
+            $files = $fs->get_area_files(
+                $context->id,
+                static::FILEMANAGER_COMPONENT,
+                static::FILEMANAGER_AREA,
+                $this->id,
+                'itemid, filepath, filename',
+                false
+            );
+
+        }
+
+        // If we have found any files, loop through them and generate download links.
+        if ($files) {
+            foreach ($files as $file) {
+                $data['files'][] = \html_writer::link(
+                    \moodle_url::make_pluginfile_url(
+                        $file->get_contextid(),
+                        $file->get_component(),
+                        $file->get_filearea(),
+                        $file->get_itemid(),
+                        $file->get_filepath(),
+                        $file->get_filename(),
+                        false
+                    ),
+                    $file->get_filename(),
+                );
+            }
+        }
+
+    }
 }

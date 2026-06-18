@@ -160,6 +160,7 @@ abstract class field {
         $data['_value'] = $this->uservalue;
         $data['_field'] = $PAGE->get_renderer('local_dataforge')->render_from_template($template, $data);
 
+
         // Load the generic field mustache template, passing through the specific field's HTML to display.
         return $PAGE->get_renderer('local_dataforge')
             ->render_from_template('local_dataforge/fields/field', $data);
@@ -174,6 +175,7 @@ abstract class field {
         global $PAGE;
 
         $data = $this->to_array();
+        $data['title'] = $data['data']?->title ?? null;
         $data['options'] = $this->decode_options();
         $data['instructions'] = false;
 
@@ -261,6 +263,15 @@ abstract class field {
             $this->userdataid = $record->id;
             $this->uservalue = $record->value;
         }
+    }
+
+    /**
+     * Has a user been loaded?
+     *
+     * @return bool
+     */
+    public function has_user(): bool {
+        return ($this->userid > 0);
     }
 
     /**

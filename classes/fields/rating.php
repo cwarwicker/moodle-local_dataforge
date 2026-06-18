@@ -16,8 +16,6 @@
 
 namespace local_dataforge\fields;
 
-use block_cilp\models\form_field;
-use core\exception\moodle_exception;
 use local_dataforge\field;
 
 /**
