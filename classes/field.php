@@ -18,6 +18,7 @@ namespace local_dataforge;
 
 use core\exception\coding_exception;
 use core\exception\moodle_exception;
+use local_dataforge\traits\orm;
 use ReflectionClass;
 
 /**
@@ -28,6 +29,8 @@ use ReflectionClass;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 abstract class field {
+    use orm;
+
     /**
      * @var string The database table the fields are stored in.
      */
@@ -52,13 +55,6 @@ abstract class field {
      * @var bool Is the field editable?
      */
     const IS_EDITABLE = true;
-
-    /**
-     * @var int The database record ID of the field.
-     */
-    protected int $id = 0 {
-        get => $this->id;
-    }
 
     /**
      * @var string The type of field.
@@ -223,19 +219,6 @@ abstract class field {
     }
 
     /**
-     * Convert the field to an array for template.
-     *
-     * @return array
-     */
-    public function to_array() : array {
-        $array = [];
-        foreach (get_object_vars($this) as $key => $value) {
-            $array[$key] = $value;
-        }
-        return $array;
-    }
-
-    /**
      * Get the submitted data for this field.
      *
      * @return mixed
@@ -283,6 +266,8 @@ abstract class field {
 
     /**
      * Save the user's submitted data for the field.
+     *
+     * @return bool
      */
     public function save(): bool {
         global $DB;

@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - https://moodle.org/
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,22 +12,30 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Language strings for local_dataforge.
+ * Manage forms.
  *
  * @copyright Conn Warwicker <conn@cmrwarwicker.com>
  * @package   local_dataforge
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+require_once('../../config.php');
 
-$string['pluginname'] = 'DataForge';
+// Must be logged in.
+require_login();
 
-$string['manageforms'] = 'Manage forms';
-$string['pleasechoose'] = 'Please choose...';
+// Forms can be created in different contexts. If not set, we default to system.
+$contextid = optional_param('contextid', \core\context\system::instance()->id, PARAM_INT);
+$context = context::instance_by_id($contextid);
 
-// Errors.
-$string['error:type:invalid'] = 'Invalid form field type ({$a})';
+// Must have the configure capability in this context.
+require_capability('local/dataforge:configure', $context);
+
+// Get the existing forms in this context.
+
+// testing
+$form = \local_dataforge\form::find(['id' => 2]);
+dd($form->delete());

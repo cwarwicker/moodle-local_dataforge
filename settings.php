@@ -25,10 +25,25 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    $settings = new admin_settingpage(
-        'local_dataforge',
-        get_string('pluginname', 'local_dataforge')
+
+    $ADMIN->add(
+        'localplugins',
+        new admin_category('dataforgecategory', get_string('pluginname', 'local_dataforge'))
     );
 
-    $ADMIN->add('localplugins', $settings);
+    $ADMIN->add(
+        'dataforgecategory',
+        new admin_externalpage(
+            'local_dataforge_manage',
+            get_string('manageforms', 'local_dataforge'),
+            new moodle_url('/local/dataforge/manage.php'),
+            'moodle/site:config'
+        )
+    );
+
+//    $settings = new admin_settingpage(
+//        'local_dataforge',
+//        get_string('pluginname', 'local_dataforge')
+//    );
+//    $ADMIN->add('localplugins', $settings);
 }
