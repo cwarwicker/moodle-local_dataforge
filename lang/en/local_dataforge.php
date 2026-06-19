@@ -28,16 +28,25 @@ $string['pluginname'] = 'DataForge';
 
 $string['actions'] = 'Actions';
 $string['confirm:delete:form'] = 'Are you sure you want to delete this form? It has {$a} responses, which will also be deleted.';
+$string['createform'] = 'Create new form';
 $string['delete'] = 'Delete';
 $string['deleted:form'] = 'Form deleted: {$a}';
 $string['deleteform'] = 'Delete form: {$a}';
 $string['edit'] = 'Edit';
+$string['editform'] = 'Edit form: {$a}';
 $string['manageforms'] = 'Manage forms';
+$string['name'] = 'Name';
 $string['newform'] = 'Create new form';
 $string['pleasechoose'] = 'Please choose...';
 $string['reports'] = 'Reports';
+$string['rule:required'] = 'This field is required';
 $string['type'] = 'Type';
+$string['form:type:report'] = 'Database Report';
+$string['form:type:report:description'] = 'A display-only report built from an SQL query on your database, with field mappings to display the data in the way you want.';
+$string['form:type:multiple'] = 'Multiple Report (Internal)';
+$string['form:type:multiple:description'] = 'A set of form fields which can be filled out multiple times, creating new instances. Example: Course Reports, Comments, etc...';
 $string['form:type:single'] = 'Single Report (Internal)';
+$string['form:type:single:description'] = 'A single set of form fields which can be filled out once. Responses can be updated, but there will only be one instance of them. Example: Personal information - Date of Birth, Address, etc...';
 
 // Errors.
 $string['error:type:invalid'] = 'Invalid form field type ({$a})';

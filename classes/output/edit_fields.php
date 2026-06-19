@@ -16,38 +16,15 @@
 
 namespace local_dataforge\output;
 
-use local_dataforge\collection;
-use stdClass;
-
 /**
- * Manage forms page renderable.
+ * Edit fields renderable, to make the nice editing of fields possible.
  *
  * @copyright Conn Warwicker <conn@cmrwarwicker.com>
  * @package   local_dataforge
  * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-class manage_forms implements \renderable, \templatable {
-
-    /**
-     * @var collection Collection of form objects.
-     */
-    protected collection $forms;
-
-    /**
-     * @var int Context ID
-     */
-    protected int $contextid;
-
-    /**
-     * Construct the manage forms page.
-     *
-     * @param collection $forms Collection of form objects.
-     */
-    public function __construct(collection $forms, int $contextid) {
-        $this->forms = $forms;
-        $this->contextid = $contextid;
-    }
+class edit_fields implements \renderable, \templatable {
 
     /**
      * Export the data for the template.
@@ -57,12 +34,6 @@ class manage_forms implements \renderable, \templatable {
      */
     public function export_for_template(\core\output\renderer_base $output): \stdClass {
         $data = new \stdClass();
-        $data->forms = [];
-        foreach ($this->forms->all() as $form) {
-            $arr = $form->to_array();
-            $data->forms[] = $arr;
-        }
-        $data->contextid = $this->contextid;
         return $data;
     }
 }

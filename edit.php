@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Manage forms.
+ * Edit or create a form.
  *
  * @copyright Conn Warwicker <conn@cmrwarwicker.com>
  * @package   local_dataforge
@@ -27,30 +27,48 @@ require_once('../../config.php');
 // Must be logged in.
 require_login();
 
-// Forms can be created in different contexts. If not set, we default to system.
-$contextid = optional_param('contextid', \core\context\system::instance()->id, PARAM_INT);
-$context = context::instance_by_id($contextid);
+$id = optional_param('id', null, PARAM_INT);
+$contextid = optional_param('contextid', null, PARAM_INT);
+$form = null;
+$urlparams = [];
 
-// Must have the configure capability in this context.
+// If we are editing an existing form load it.
+if ($id) {
+    $form = \local_dataforge\form::load_from_id($id);
+    $context = context::instance_by_id($form->contextid);
+    $urlparams['id'] = $id;
+} else if ($contextid) {
+    // Instead, if we are creating a new form, we should have supplied a context ID in which to do so.
+    $context = context::instance_by_id($contextid);
+    $urlparams['contextid'] = $contextid;
+} else {
+    // If we didn't, fallback to system.
+    $context = \core\context\system::instance();
+}
+
+// Must be able to configure forms in this context.
 require_capability('local/dataforge:configure', $context);
 
 // Setup the page.
-$pagetitle = get_string('manageforms', 'local_dataforge');
-$PAGE->set_url(new moodle_url('/local/dataforge/manage.php'));
+$pagetitle = ($form) ?
+    get_string('editform', 'local_dataforge', $form->name) :
+    get_string('createform', 'local_dataforge');
+
+$url = new moodle_url('/local/dataforge/edit.php', $urlparams);
+$PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_title($pagetitle);
 
 // Get the renderer.
 $output = $PAGE->get_renderer('local_dataforge');
 
-// Get the existing forms in this context.
-$forms = \local_dataforge\form::all(['contextid' => $context->id]);
-
-// Get the renderable.
-$renderable = new \local_dataforge\output\manage_forms($forms, $contextid);
+// Get the actual moodle form for creating the data form.
+$mform = new \local_dataforge\forms\edit_form(null, ['context' => $context, 'form' => $form]);
 
 // Output the page.
 echo $output->header();
 echo $output->heading($pagetitle);
-echo $output->render($renderable);
+
+echo $mform->render();
+
 echo $output->footer();

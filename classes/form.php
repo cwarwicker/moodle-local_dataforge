@@ -29,6 +29,11 @@ class form {
     use orm;
 
     /**
+     * @var array Array of available form types.
+     */
+    const TYPES = ['single', 'multiple', 'report'];
+
+    /**
      * @var string The database table the forms are stored in.
      */
     const TABLE = 'local_dataforge';

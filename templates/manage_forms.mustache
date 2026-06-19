@@ -24,6 +24,7 @@
     * forms.name - Name of form
     * forms.typename - Full name of type of form
     * forms.contextname - Full name of context the form is in
+    * contextid - Context ID of forms
 
     Example context (json):
     {
@@ -33,13 +34,14 @@
                 "typename": "Single form (Internal)",
                 "contextname": "Course: Some course"
             }
-        ]
+        ],
+        "contextid": 1
     }
 }}
 
 <div>
     <p>
-        <a href="/local/dataforge/edit.php" class="btn btn-primary">
+        <a href="/local/dataforge/edit.php?contextid={{contextid}}" class="btn btn-primary">
             <i class="fas fa-plus"></i> {{#str}} newform, local_dataforge {{/str}}
         </a>
     </p>

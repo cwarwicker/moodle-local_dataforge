@@ -39,9 +39,21 @@ require_capability('local/dataforge:configure', $context);
 
 // Are we confirming deletion?
 if ($confirm) {
+    // Sesskey must be present and valid.
     require_sesskey();
+
+    // Delete the form.
     $form->delete();
-    redirect(new moodle_url('/local/dataforge/manage.php'), get_string('deleted:form', 'local_dataforge', $form->name, null, \core\output\notification::NOTIFY_SUCCESS));
+
+    // Return to manage page, using context of deleted form, since that's probably where we came from.
+    redirect(
+        new moodle_url('/local/dataforge/manage.php', [
+            'contextid' => $form->contextid,
+        ]),
+        get_string('deleted:form', 'local_dataforge', $form->name),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
 }
 
 // Setup the page.
