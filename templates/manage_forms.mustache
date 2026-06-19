@@ -19,19 +19,31 @@
 
     Manage forms template.
 
-    Classes required for JS:
-    * none
-
-    Data attributes required for JS:
-    * none
-
     Context variables required for this template:
-    * none
+    * forms - Array of form data
+    * forms.name - Name of form
+    * forms.typename - Full name of type of form
+    * forms.contextname - Full name of context the form is in
 
     Example context (json):
     {
+        "forms": [
+            {
+                "name": "My form",
+                "typename": "Single form (Internal)",
+                "contextname": "Course: Some course"
+            }
+        ]
     }
 }}
+
+<div>
+    <p>
+        <a href="/local/dataforge/edit.php" class="btn btn-primary">
+            <i class="fas fa-plus"></i> {{#str}} newform, local_dataforge {{/str}}
+        </a>
+    </p>
+</div>
 
 <table class="table table-striped">
     <thead>
@@ -49,7 +61,15 @@
             <td>{{typename}}</td>
             <td>{{contextname}}</td>
             <td>
-
+                <a href="/local/dataforge/report.php?id={{id}}" class="btn btn-info">
+                    <i class="fa-solid fa-chart-pie"></i> {{#str}} reports, local_dataforge {{/str}}
+                </a>
+                <a href="/local/dataforge/edit.php?id={{id}}" class="btn btn-primary">
+                    <i class="fas fa-edit"></i> {{#str}} edit, local_dataforge {{/str}}
+                </a>
+                <a href="/local/dataforge/delete.php?id={{id}}" class="btn btn-danger">
+                    <i class="fas fa-trash"></i> {{#str}} delete, local_dataforge {{/str}}
+                </a>
             </td>
         </tr>
     {{/forms}}

@@ -15,7 +15,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Manage forms.
+ * Delete a form.
  *
  * @copyright Conn Warwicker <conn@cmrwarwicker.com>
  * @package   local_dataforge
@@ -27,30 +27,40 @@ require_once('../../config.php');
 // Must be logged in.
 require_login();
 
-// Forms can be created in different contexts. If not set, we default to system.
-$contextid = optional_param('contextid', \core\context\system::instance()->id, PARAM_INT);
-$context = context::instance_by_id($contextid);
+$id = required_param('id', PARAM_INT);
+$confirm = optional_param('confirm', 0, PARAM_INT);
 
-// Must have the configure capability in this context.
+// Form ID must be specified and valid.
+$form = \local_dataforge\form::load_from_id($id);
+
+// Must be able to configure forms in this context.
+$context = context::instance_by_id($form->contextid);
 require_capability('local/dataforge:configure', $context);
 
+// Are we confirming deletion?
+if ($confirm) {
+    require_sesskey();
+    $form->delete();
+    redirect(new moodle_url('/local/dataforge/manage.php'), get_string('deleted:form', 'local_dataforge', $form->name, null, \core\output\notification::NOTIFY_SUCCESS));
+}
+
 // Setup the page.
-$pagetitle = get_string('manageforms', 'local_dataforge');
-$PAGE->set_url(new moodle_url('/local/dataforge/manage.php'));
+$pagetitle = get_string('deleteform', 'local_dataforge', $form->name);
+$url = new moodle_url('/local/dataforge/delete.php', [
+    'id' => $id,
+]);
+$PAGE->set_url($url);
 $PAGE->set_context($context);
 $PAGE->set_title($pagetitle);
 
 // Get the renderer.
 $output = $PAGE->get_renderer('local_dataforge');
 
-// Get the existing forms in this context.
-$forms = \local_dataforge\form::all(['contextid' => $context->id]);
-
-// Get the renderable.
-$renderable = new \local_dataforge\output\manage_forms($forms);
-
 // Output the page.
 echo $output->header();
 echo $output->heading($pagetitle);
+
+$renderable = new \local_dataforge\output\delete_form($form, $url);
 echo $output->render($renderable);
+
 echo $output->footer();

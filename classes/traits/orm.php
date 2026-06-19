@@ -49,6 +49,7 @@ trait orm {
      */
     public function delete(): bool {
         global $DB;
+        // TODO - hook/event.
         return $DB->delete_records(static::table(), ['id' => $this->id]);
     }
 
@@ -137,8 +138,21 @@ trait orm {
      * @return static Returns a new instance of the class this is called on.
      */
     public static function load(\stdClass $data): static {
-        $class = get_called_class();
-        $obj = new $class($data->id);
+        $obj = new static($data->id);
+        $obj->map($data);
+        return $obj;
+    }
+
+    /**
+     * Helper static function to return an instance of an object based on its ID.
+     *
+     * @param int $id The database record ID of the object.
+     * @return static Returns a new instance of the class this is called on.
+     */
+    public static function load_from_id(int $id): static {
+        global $DB;
+        $data = $DB->get_record(static::table(), ['id' => $id], '*', MUST_EXIST);
+        $obj = new static($data->id);
         $obj->map($data);
         return $obj;
     }

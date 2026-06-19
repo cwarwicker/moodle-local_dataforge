@@ -27,8 +27,15 @@ defined('MOODLE_INTERNAL') || die();
 $string['pluginname'] = 'DataForge';
 
 $string['actions'] = 'Actions';
+$string['confirm:delete:form'] = 'Are you sure you want to delete this form? It has {$a} responses, which will also be deleted.';
+$string['delete'] = 'Delete';
+$string['deleted:form'] = 'Form deleted: {$a}';
+$string['deleteform'] = 'Delete form: {$a}';
+$string['edit'] = 'Edit';
 $string['manageforms'] = 'Manage forms';
+$string['newform'] = 'Create new form';
 $string['pleasechoose'] = 'Please choose...';
+$string['reports'] = 'Reports';
 $string['type'] = 'Type';
 $string['form:type:single'] = 'Single Report (Internal)';
 
