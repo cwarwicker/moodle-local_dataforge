@@ -16,6 +16,8 @@
 
 namespace local_dataforge\traits;
 
+use local_dataforge\collection;
+
 /**
  * ORM trait for common DB helper methods.
  *
@@ -145,21 +147,21 @@ trait orm {
      * Get all of the records in the table, matching the filters, and return the objects.
      *
      * @param array $filters Array of filters.
-     * @return array
+     * @return collection
      */
-    public static function all(array $filters = []) {
+    public static function all(array $filters = []): collection {
         global $DB;
-        $return = [];
+        $items = [];
         $records = $DB->get_records(static::table(), $filters);
         if ($records) {
             foreach ($records as $record) {
                 $obj = static::load($record);
                 if ($obj && $obj->exists()) {
-                    $return[$record->id] = $obj;
+                    $items[$record->id] = $obj;
                 }
             }
         }
-        return $return;
+        return new collection($items);
     }
 
     /**

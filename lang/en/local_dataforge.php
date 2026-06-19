@@ -26,8 +26,11 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['pluginname'] = 'DataForge';
 
+$string['actions'] = 'Actions';
 $string['manageforms'] = 'Manage forms';
 $string['pleasechoose'] = 'Please choose...';
+$string['type'] = 'Type';
+$string['form:type:single'] = 'Single Report (Internal)';
 
 // Errors.
 $string['error:type:invalid'] = 'Invalid form field type ({$a})';

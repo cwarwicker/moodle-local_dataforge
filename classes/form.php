@@ -41,6 +41,13 @@ class form {
     }
 
     /**
+     * @var string The full type name for the form.
+     */
+    public string $typename {
+        get => get_string('form:type:' . $this->type, 'local_dataforge');
+    }
+
+    /**
      * @var string The name of the form.
      */
     public string $name = '' {
@@ -52,6 +59,16 @@ class form {
      */
     public int $contextid = 0 {
         get => $this->contextid;
+    }
+
+    /**
+     * @var string The full context name for the form.
+     */
+    public string $contextname {
+        get {
+            $context = \context::instance_by_id($this->contextid);
+            return $context->get_context_name();
+        }
     }
 
     /**

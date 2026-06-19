@@ -34,8 +34,22 @@ $context = context::instance_by_id($contextid);
 // Must have the configure capability in this context.
 require_capability('local/dataforge:configure', $context);
 
-// Get the existing forms in this context.
+// Setup the page.
+$pagetitle = get_string('manageforms', 'local_dataforge');
+$PAGE->set_url(new moodle_url('/local/dataforge/manage.php'));
+$PAGE->set_context($context);
+$PAGE->set_title($pagetitle);
 
-// testing
-$form = \local_dataforge\form::find(['id' => 2]);
-dd($form->delete());
+// Get the renderer.
+$output = $PAGE->get_renderer('local_dataforge');
+
+// Get the existing forms in this context.
+$forms = \local_dataforge\form::all(['contextid' => $context->id]);
+
+echo $output->header();
+echo $output->heading($pagetitle);
+
+$renderable = new \local_dataforge\output\manage_forms($forms);
+echo $output->render($renderable);
+
+echo $output->footer();
